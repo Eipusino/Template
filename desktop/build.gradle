@@ -1,0 +1,37 @@
+apply plugin: 'java'
+
+sourceSets.main.java.srcDir('src')
+
+repositories {
+	mavenCentral()
+	maven { url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
+	maven { url 'https://www.jitpack.io' }
+}
+
+java {
+	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = "UTF-8"
+
+	options.compilerArgs.addAll([
+			"--add-exports", "java.base/jdk.internal.misc=ALL-UNNAMED"
+	])
+}
+
+dependencies {
+	compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+	compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+	compileOnly files("D:/Projects/Template/libs/heavy-industry-mod-y0828a0.jar")
+}
+
+jar {
+	archiveFileName = "${rootProject.name}Desktop.jar"
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+}

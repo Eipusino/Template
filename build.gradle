@@ -1,0 +1,28 @@
+apply plugin: 'java'
+
+sourceSets.main.java.srcDir('src')
+
+repositories {
+	mavenCentral()
+	maven { url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
+	maven { url 'https://www.jitpack.io' }
+}
+
+java {
+	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_17
+}
+
+dependencies {
+	implementation "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+	implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+	implementation files("libs/asm-9.5.jar")
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = "UTF-8"
+
+	options.compilerArgs.addAll([
+			"--add-exports", "java.base/jdk.internal.misc=ALL-UNNAMED"
+	])
+}
