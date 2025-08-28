@@ -20,7 +20,7 @@ final class HiddenApi {
 	public static final int offsetArtMethod = 24;
 
 	static Object[] oneArray;
-	static Method vm;
+	static Method loadClass;
 	static long offset;
 
 	static {
@@ -55,17 +55,23 @@ final class HiddenApi {
 		try {
 			// MAYBE: sdk_version < 28
 			runtime.setHiddenApiExemptions(new String[]{"L"});
+
 			return true;
-		} catch (Throwable ignored) {}
+		} catch (Throwable e) {
+			Log.err(e);
+		}
 
 		try {
 			// Obtaining method through reflection
-			Method m = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
-			m.setAccessible(true);
-			Method setHiddenApiExemptions = (Method) m.invoke(VMRuntime.class, "setHiddenApiExemptions", new Class[]{String[].class});
+			Method method = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
+			method.setAccessible(true);
+			Method setHiddenApiExemptions = (Method) method.invoke(VMRuntime.class, "setHiddenApiExemptions", new Class[]{String[].class});
 			invoke(setHiddenApiExemptions);
+
 			return true;
-		} catch (Throwable ignored) {}
+		} catch (Throwable e) {
+			Log.err(e);
+		}
 
 		return false;
 	}
@@ -127,7 +133,9 @@ final class HiddenApi {
 	public static long addressOf(Object[] array) {
 		try {
 			return runtime.addressOf(array);
-		} catch (Throwable ignored) {}
+		} catch (Throwable e) {
+			Log.err(e);
+		}
 
 		return addressOf((Object) array);
 	}
@@ -137,10 +145,10 @@ final class HiddenApi {
 	}
 
 	static void replaceMethod() throws Exception {
-		vm = Class.forName("java.lang.ClassLoader").getDeclaredMethod("findLoadedClass", String.class);
-		vm.setAccessible(true);
+		loadClass = Class.forName("java.lang.ClassLoader").getDeclaredMethod("findLoadedClass", String.class);
+		loadClass.setAccessible(true);
 
-		replaceAMethod(vm, Delegator.class.getDeclaredMethod("findLoadedClass", String.class));
+		replaceAMethod(loadClass, Delegator.class.getDeclaredMethod("findLoadedClass", String.class));
 	}
 
 	static void replaceAMethod(Method dest, Method src) {
@@ -167,7 +175,8 @@ final class HiddenApi {
 
 	public static class Super {
 		public Class<?> findLoadedClass(String name) {
-			System.out.println("Not impl yet");
+			// Not impl yet
+
 			return null;
 		}
 	}
@@ -179,9 +188,7 @@ final class HiddenApi {
 			if (name.equals("java.lang.NullPointerException")) return NullPointerException.class;
 
 			try {
-				Class<?> res = (Class<?>) vm.invoke(this, name);
-				Log.info(res);
-				return res;
+				return (Class<?>) loadClass.invoke(this, name);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

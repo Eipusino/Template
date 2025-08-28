@@ -21,12 +21,16 @@ ext {
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
+
+	options.compilerArgs.addAll([
+			"--add-exports", "java.base/jdk.internal.misc=ALL-UNNAMED"
+	])
 }
 
 dependencies {
 	compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
 	compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-	compileOnly files("D:/Projects/Template/libs/heavy-industry-mod-y0828a0.jar", "D:/Projects/Template/libs/android.jar", "D:/Projects/Template/libs/android-dalvik.jar")
+	compileOnly files("D:/Projects/Template/libs/HeavyIndustryMod-Y0828A0.jar", "D:/Projects/Template/libs/android.jar", "D:/Projects/Template/libs/android-dalvik.jar")
 }
 
 jar {

@@ -1,14 +1,16 @@
 package heavyindustry.android;
 
+import arc.util.Log;
+
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class Android {
-	public static final Lookup lookup;
+	static Lookup lookup;
 
-	public static Field accessFlags;
+	static Field accessFlags;
 
 	static Method fieldsMethod;
 	static Method methodsMethod;
@@ -21,7 +23,9 @@ public class Android {
 			Method declaredMethod2 = Class.class.getDeclaredMethod("getDeclaredMethods");
 			methodsMethod = declaredMethod2;
 			declaredMethod2.setAccessible(true);
-		} catch (Throwable ignored) {}
+		} catch (Throwable e) {
+			Log.err(e);
+		}
 
 		lookup = getLookup();
 
@@ -30,7 +34,7 @@ public class Android {
 			declaredField.setAccessible(true);
 			accessFlags = declaredField;
 		} catch (NoSuchFieldException e) {
-			throw new RuntimeException(e);
+			Log.err(e);
 		}
 	}
 
@@ -44,6 +48,8 @@ public class Android {
 				}
 			}
 		} catch (Throwable e) {
+			Log.err(e);
+
 			return MethodHandles.lookup();
 		}
 

@@ -1,5 +1,6 @@
 package heavyindustry.android;
 
+import arc.util.Log;
 import dalvik.system.VMStack;
 import heavyindustry.util.ReflectImpl;
 
@@ -7,11 +8,17 @@ import java.lang.reflect.AccessibleObject;
 
 public class AndroidImpl implements ReflectImpl {
 	public AndroidImpl() {
-		HiddenApi.load();
-		Android.load();
+		try {
+			HiddenApi.load();
+			HiddenApi.setHiddenApiExemptions();
+
+			Android.load();
+		} catch (Throwable e) {
+			Log.err(e);
+		}
 	}
 
-	public void setOverride(AccessibleObject override) throws Throwable {
+	public void setOverride(AccessibleObject override) {
 		override.setAccessible(true);
 	}
 
