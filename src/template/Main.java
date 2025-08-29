@@ -10,6 +10,7 @@ public class Main implements Cloneable {
 	public static Object var3 = new Object() {
 		public int var00 = 118;
 	};
+	public static Object[] var4 = {1f};
 
 	public static void main(String... arg) {
 		System.out.println("oh no");

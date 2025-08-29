@@ -23,7 +23,7 @@ import static heavyindustry.util.Unsafer.unsafe;
  *
  * @author EBwilson
  */
-final class Demodulator {
+public final class Demodulator {
 	private static final long fieldFilterOffset = 112l;
 
 	private static final Field opensField;
