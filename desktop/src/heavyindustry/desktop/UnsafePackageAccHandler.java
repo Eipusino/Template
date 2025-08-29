@@ -9,10 +9,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * 基于{@link jdk.internal.misc.Unsafe}实现的强制保护域类加载处理程序
+ * Implementation of Mandatory Protection Domain Class Loading Processing Program Based on
+ * {@link jdk.internal.misc.Unsafe}.
  *
- * @author EBwilson
- * @since 1.6
+ * @since 1.0.8
  */
 public class UnsafePackageAccHandler extends PackageAccHandler {
 	private static final Object unsafe;

@@ -17,13 +17,13 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * 用于创建{@linkplain DynamicMaker 动态生成器}的工厂类，内部提供了默认生成器的声明
+ * The factory class used to create the {@linkplain DynamicMaker dynamic generator} provides a declaration of the default generator
+ * internally.
  *
- * @author EBwilson
- * @since 1.6
+ * @since 1.0.8
  */
 public class DynamicFactory {
-	private static final DynamicFactory defFactory = new DynamicFactory() {{
+	private static final DynamicFactory defaultFactory = new DynamicFactory() {{
 		setDefaultGenerator();
 		setDefaultHelper();
 		setPackageAccHandler(new UnsafePackageAccHandler(generator));
@@ -34,17 +34,18 @@ public class DynamicFactory {
 	protected JavaHandleHelper helper;
 
 	/**
-	 * 直接获取默认的通用实现实例，该方法获取的动态生成器等价于：
+	 * Directly obtaining the default generic implementation instance, the dynamic generator obtained by
+	 * this method is equivalent to:
 	 * <pre>{@code
 	 * new DynamicFactory().setDefaultGenerator().setDefaultHelper().getMaker();
 	 * }</pre>
 	 *
-	 * @return 一个由默认声明生产的动态生成器
+	 * @return A dynamic generator produced by default declaration
 	 * @see DynamicFactory#setDefaultGenerator()
 	 * @see DynamicFactory#setDefaultHelper()
 	 */
 	public static DynamicMaker getDefault() {
-		return defFactory.getMaker();
+		return defaultFactory.getMaker();
 	}
 
 	/**

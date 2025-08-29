@@ -1,6 +1,5 @@
 package heavyindustry.desktop.util;
 
-import arc.Core;
 import arc.files.Fi;
 import arc.files.ZipFi;
 import arc.util.Log;
@@ -25,9 +24,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class DesktopGeneratedClassLoader extends AbstractGeneratedClassLoader {
-	private static final Fi jarFileCache = Core.settings.getDataDirectory().child("heavyindustry").child("cache");
-
-	public static final Fi tmpFile = jarFileCache.child("temp-file.jar");
+	public static final Fi tmpFile = JarList.jarFileCache.child("TempFile.jar");
 
 	private static final Object unsafe;
 	private static final Method defineClass;

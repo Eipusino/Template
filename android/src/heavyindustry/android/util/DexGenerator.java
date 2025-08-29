@@ -15,11 +15,24 @@ import dynamilize.classmaker.code.IOperate;
 import heavyindustry.util.handler.MethodHandler;
 import org.objectweb.asm.Opcodes;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import static dynamilize.classmaker.ClassInfo.STRING_TYPE;
 
 public class DexGenerator extends ASMGenerator {
 	private static final ClassInfo<StringBuilder> BUILDER_TYPE = ClassInfo.asType(StringBuilder.class);
 	private static final IMethod<StringBuilder, String> TO_STRING = BUILDER_TYPE.getMethod(STRING_TYPE, "toString");
+
+	private static final Method getMagic;
+
+	static {
+		try {
+			getMagic = DirectClassFile.class.getDeclaredMethod("getMagic");
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	public DexGenerator(ByteClassLoader classLoader) {
 		super(classLoader, Opcodes.V1_8);
@@ -37,7 +50,12 @@ public class DexGenerator extends ASMGenerator {
 				classInfo.internalName() + ".class"
 		);
 		MethodHandler.invokeDefault(classFile, "setAttributeFactory");
-		classFile.getMagic();
+		//classFile.getMagic();
+		try {
+			getMagic.invoke(classFile);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
 		DxContext context = new DxContext();
 
 		dexFile.add(MethodHandler.invokeDefault(CfTranslator.class, "translate",
