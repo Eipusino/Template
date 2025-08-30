@@ -34,8 +34,7 @@ public class AndroidFieldAccessHelper implements FieldAccessHelper {
 				while (curr != null) {
 					try {
 						return getField0(curr, field);
-					} catch (NoSuchFieldException ignored) {
-					}
+					} catch (NoSuchFieldException ignored) {}
 
 					curr = curr.getSuperclass();
 				}

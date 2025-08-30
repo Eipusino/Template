@@ -36,11 +36,14 @@ public class AndroidClassHandler implements ClassHandler {
 			DexLoaderFactory.getClassLoader(AndroidClassHandler.class.getClassLoader());
 
 	protected final AbstractGeneratedClassLoader generatedLoader;
-	protected final ModInfo mod;
+
 	protected boolean generateFinished;
+
 	protected DexGenerator generator;
 	protected PackageAccHandler accHandler;
 	protected DynamicMaker maker;
+
+	protected final ModInfo mod;
 
 	public AndroidClassHandler(ModInfo mod) {
 		this.mod = mod;

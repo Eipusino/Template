@@ -1,6 +1,7 @@
 package heavyindustry.android;
 
 import arc.util.Log;
+import dalvik.system.VMRuntime;
 import dalvik.system.VMStack;
 import dynamilize.IllegalHandleException;
 import heavyindustry.HVars;
@@ -18,6 +19,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class AndroidImpl implements ReflectImpl {
+	static VMRuntime runtime = VMRuntime.getRuntime();
+
 	static Lookup lookup;
 
 	static Field accessFlags;
@@ -95,10 +98,14 @@ public class AndroidImpl implements ReflectImpl {
 	}
 
 	@Override
-	public void setPublic(Class<?> obj) throws Exception {
-		if (accessFlags != null) {
-			int flags = accessFlags.getInt(obj);
-			accessFlags.setInt(obj, 65535 & ((flags & 65535 & (-17) & (-3)) | 1));
+	public void setPublic(Class<?> obj) {
+		try {
+			if (accessFlags != null) {
+				int flags = accessFlags.getInt(obj);
+				accessFlags.setInt(obj, 65535 & ((flags & 65535 & (-17) & (-3)) | 1));
+			}
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

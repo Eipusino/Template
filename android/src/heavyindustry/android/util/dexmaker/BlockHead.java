@@ -12,11 +12,11 @@ public class BlockHead {
 	private final List<Insn> insns = new ArrayList<>();
 
 	private final List<BlockHead> branches = new ArrayList<>();
+	private BlockHead primaryBranch;
 
 	public boolean isAdded;
-	public int labelId;
 
-	private BlockHead primaryBranch;
+	public int labelId;
 
 	public void addInsn(Insn insn) {
 		insns.add(insn);

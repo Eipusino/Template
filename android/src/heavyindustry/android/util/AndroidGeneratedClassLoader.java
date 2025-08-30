@@ -2,6 +2,7 @@ package heavyindustry.android.util;
 
 import com.android.dex.Dex;
 import com.android.dx.command.dexer.DxContext;
+import com.android.dx.merge.CollisionPolicy;
 import com.android.dx.merge.DexMerger;
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.DexClassLoader;
@@ -15,8 +16,9 @@ import java.io.File;
 import java.io.IOException;
 
 public class AndroidGeneratedClassLoader extends AbstractGeneratedClassLoader {
-	protected final ModInfo mod;
 	private ClassLoader dvLoader;
+
+	protected final ModInfo mod;
 
 	public AndroidGeneratedClassLoader(ModInfo mod, ClassLoader parent) {
 		super(JarList.inst().loadCacheFile(mod).file(), parent);
@@ -32,8 +34,9 @@ public class AndroidGeneratedClassLoader extends AbstractGeneratedClassLoader {
 		try {
 			byte[] out;
 			if (file.exists()) {
-				DexMerger merger = MethodHandler.newInstanceDefault(DexMerger.class,
+				DexMerger merger = new DexMerger(
 						new Dex[]{new Dex(file), new Dex(byteCode)},
+						CollisionPolicy.KEEP_FIRST,
 						context
 				);
 				out = merger.merge().getBytes();

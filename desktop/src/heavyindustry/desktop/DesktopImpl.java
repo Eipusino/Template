@@ -17,8 +17,9 @@ import java.util.Optional;
 import static heavyindustry.util.Unsafer.unsafe;
 
 public class DesktopImpl implements ReflectImpl {
-	static final Lookup lookup;
-	static StackWalker walker = StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
+	public static final Lookup lookup;
+
+	static final StackWalker walker;
 
 	static {
 		try {
@@ -28,6 +29,8 @@ public class DesktopImpl implements ReflectImpl {
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
+
+		walker = StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
 	}
 
 	@SuppressWarnings("unchecked")

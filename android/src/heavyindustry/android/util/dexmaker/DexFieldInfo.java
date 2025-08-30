@@ -30,6 +30,22 @@ public class DexFieldInfo {
 		this.constant = toConstant(field.initial());
 	}
 
+	public String name() {
+		return field.name();
+	}
+
+	public int modifiers() {
+		return field.modifiers();
+	}
+
+	public Constant getConstant() {
+		return constant;
+	}
+
+	public EncodedField toItem() {
+		return null;
+	}
+
 	private static Constant toConstant(Object initial) {
 		if (initial instanceof Boolean b) return CstBoolean.make(b);
 		else if (initial instanceof Byte b) return CstByte.make(b);
@@ -59,21 +75,5 @@ public class DexFieldInfo {
 
 			return new CstArray(list);
 		} else throw new IllegalHandleException("invalid constant value: " + initial);
-	}
-
-	public String name() {
-		return field.name();
-	}
-
-	public int modifiers() {
-		return field.modifiers();
-	}
-
-	public Constant getConstant() {
-		return constant;
-	}
-
-	public EncodedField toItem() {
-		return null;
 	}
 }

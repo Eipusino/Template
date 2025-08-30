@@ -25,10 +25,11 @@ public class DesktopFieldAccessHelper implements FieldAccessHelper {
 
 	static {
 		boolean tmp;
+
 		try {
-			Class.forName("sun.misc.Unsafe");
+			Log.infoTag("Unsafe", "getUnsafe: " + Unsafer.unsafe);
 			tmp = true;
-		} catch (ClassNotFoundException e) {
+		} catch (Throwable e) {
 			Log.err(e);
 
 			tmp = false;

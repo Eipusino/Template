@@ -64,16 +64,17 @@ public class DexGeneratorCoding extends AbstractClassGenerator {
 	private final LinkedList<RegisterSpec> tmpDoubleRegister = new LinkedList<>();
 	private final LinkedList<RegisterSpec> tmpIntLikeRegister = new LinkedList<>();
 	private final LinkedList<RegisterSpec> tmpRefRegister = new LinkedList<>();
+	private SourcePosition position;
+	private int regOff;
 
 	DexFile dexFile;
 	DexClassInfo currClass;
 	DexFieldInfo currField;
 	DexMethodInfo currMethod;
-	IClass<?> generating;
-	BlockHead currBlock;
 
-	private SourcePosition position;
-	private int regOff;
+	IClass<?> generating;
+
+	BlockHead currBlock;
 
 	public DexGeneratorCoding(ByteClassLoader classLoader) {
 		this.loader = classLoader;
