@@ -54,7 +54,9 @@ public final class Demodulator {
 	public static void makeModuleOpen(Module from, Class<?> clazz, Module to) {
 		if (clazz.isArray()) {
 			makeModuleOpen(from, clazz.getComponentType(), to);
-		} else makeModuleOpen(from, clazz.getPackage(), to);
+		} else {
+			makeModuleOpen(from, clazz.getPackage(), to);
+		}
 	}
 
 	public static void makeModuleOpen(Module from, Package pac, Module to) {

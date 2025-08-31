@@ -1,23 +1,17 @@
 package heavyindustry.desktop;
 
-import dynamilize.IllegalHandleException;
-import heavyindustry.HVars;
-import heavyindustry.desktop.util.handler.DesktopClassHandler;
-import heavyindustry.mod.ModGetter;
-import heavyindustry.mod.ModInfo;
 import heavyindustry.util.ReflectImpl;
-import mindustry.mod.Mod;
 
 import java.lang.StackWalker.Option;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 import static heavyindustry.util.Unsafer.unsafe;
 
+@SuppressWarnings("unused")
 public class DesktopImpl implements ReflectImpl {
-	public static final Lookup lookup;
+	static final Lookup lookup;
 
 	static final StackWalker walker;
 
@@ -33,33 +27,10 @@ public class DesktopImpl implements ReflectImpl {
 		walker = StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
 	}
 
-	@SuppressWarnings("unchecked")
-	public DesktopImpl() {
-		HVars.accessibleHelper = new DesktopAccessibleHelper();
-		HVars.fieldAccessHelper = new DesktopFieldAccessHelper();
-		HVars.methodInvokeHelper = new DesktopMethodInvokeHelper();
-
-		HVars.classesFactory = main -> {
-			try {
-				if (!Mod.class.isAssignableFrom(main))
-					throw new IllegalHandleException("class was not a mod main class");
-
-				ModInfo mod = ModGetter.getModWithClass((Class<? extends Mod>) main);
-				if (mod == null)
-					throw new IllegalHandleException("mod with main class " + main + " was not found");
-
-				ModGetter.checkModFormat(mod.file);
-
-				return DesktopClassHandler.class.getConstructor(ModInfo.class).newInstance(mod);
-			} catch (IllegalHandleException | InvocationTargetException | InstantiationException |
-			         IllegalAccessException | NoSuchMethodException e) {
-				throw new RuntimeException(e);
-			}
-		};
-	}
-
 	@Override
-	public void setPublic(Class<?> cls) {}
+	public void setPublic(Class<?> cls) {
+		// There's no need to do this
+	}
 
 	@Override
 	public void setOverride(AccessibleObject override) {

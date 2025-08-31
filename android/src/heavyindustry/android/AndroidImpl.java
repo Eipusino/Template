@@ -1,84 +1,42 @@
 package heavyindustry.android;
 
 import arc.util.Log;
-import dalvik.system.VMRuntime;
 import dalvik.system.VMStack;
-import dynamilize.IllegalHandleException;
-import heavyindustry.HVars;
-import heavyindustry.android.util.handler.AndroidClassHandler;
-import heavyindustry.mod.ModGetter;
-import heavyindustry.mod.ModInfo;
-import heavyindustry.util.AccessibleHelper;
 import heavyindustry.util.ReflectImpl;
-import mindustry.mod.Mod;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 public class AndroidImpl implements ReflectImpl {
-	static VMRuntime runtime = VMRuntime.getRuntime();
-
 	static Lookup lookup;
-
 	static Field accessFlags;
 
-	static Method fieldsMethod;
-	static Method methodsMethod;
+	static boolean setHiddenApi;
 
 	static {
 		try {
-			fieldsMethod = Class.class.getDeclaredMethod("getDeclaredFields");
-			fieldsMethod.setAccessible(true);
-			methodsMethod = Class.class.getDeclaredMethod("getDeclaredMethods");
-			methodsMethod.setAccessible(true);
+			HiddenApi.setHiddenApiExemptions();
+
+			setHiddenApi = true;
+		} catch (Throwable e) {
+			Log.err(e);
+		}
+
+		try {
 			accessFlags = Class.class.getDeclaredField("accessFlags");
 			accessFlags.setAccessible(true);
-		} catch (NoSuchMethodException | NoSuchFieldException e) {
+		} catch (NoSuchFieldException e) {
 			Log.err(e);
 		}
 
 		lookup = getLookup();
 	}
 
-	@SuppressWarnings("unchecked")
-	public AndroidImpl() {
-		HVars.accessibleHelper = new AccessibleHelper() {
-			@Override
-			public void makeAccessible(AccessibleObject object) {
-				object.setAccessible(true);
-			}
-
-			@Override
-			public void makeClassAccessible(Class<?> clazz) {
-				//no action
-			}
-		};
-		HVars.fieldAccessHelper = new AndroidFieldAccessHelper();
-		HVars.methodInvokeHelper = new AndroidMethodInvokeHelper();
-
-		HVars.classesFactory = main -> {
-			try {
-				if (!Mod.class.isAssignableFrom(main))
-					throw new IllegalHandleException("class was not a mod main class");
-
-				ModInfo mod = ModGetter.getModWithClass((Class<? extends Mod>) main);
-				if (mod == null)
-					throw new IllegalHandleException("mod with main class " + main + " was not found");
-
-				ModGetter.checkModFormat(mod.file);
-				return new AndroidClassHandler(mod);
-			} catch (IllegalHandleException e) {
-				throw new RuntimeException(e);
-			}
-		};
-	}
-
 	static Lookup getLookup() {
 		try {
-			Field[] fields = (Field[]) fieldsMethod.invoke(Lookup.class);
+			Field[] fields = Lookup.class.getDeclaredFields();
 			for (Field field : fields) {
 				if ("IMPL_LOOKUP".equals(field.getName())) {
 					field.setAccessible(true);
@@ -86,8 +44,12 @@ public class AndroidImpl implements ReflectImpl {
 				}
 			}
 		} catch (Throwable e) {
-			Log.err(e);
+			Log.err("Reflection acquisition of IMPL_LOOKUP encountered an exception. " + e.getClass().getName() + ": " + e.getMessage());
+
+			return MethodHandles.lookup();
 		}
+
+		Log.err("IMPL_LOOKUP field not found");
 
 		return MethodHandles.lookup();
 	}
