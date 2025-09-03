@@ -10,16 +10,13 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 
 public class AndroidImpl implements ReflectImpl {
-	static Lookup lookup;
-	static Field accessFlags;
+	public static final Lookup lookup;
 
-	static boolean setHiddenApi;
+	static Field accessFlags;
 
 	static {
 		try {
 			HiddenApi.setHiddenApiExemptions();
-
-			setHiddenApi = true;
 		} catch (Throwable e) {
 			Log.err(e);
 		}
@@ -44,12 +41,12 @@ public class AndroidImpl implements ReflectImpl {
 				}
 			}
 		} catch (Throwable e) {
-			Log.err("Reflection acquisition of IMPL_LOOKUP encountered an exception. " + e.getClass().getName() + ": " + e.getMessage());
+			Log.err("Reflection acquisition of 'IMPL_LOOKUP' encountered an exception. " + e.getClass().getName() + ": " + e.getMessage());
 
 			return MethodHandles.lookup();
 		}
 
-		Log.err("IMPL_LOOKUP field not found");
+		Log.err("'IMPL_LOOKUP' field not found");
 
 		return MethodHandles.lookup();
 	}
@@ -72,7 +69,12 @@ public class AndroidImpl implements ReflectImpl {
 	}
 
 	@Override
-	public Class<?> getCallerClass() {
+	public Class<?> callerClass() {
 		return VMStack.getStackClass2();
+	}
+
+	@Override
+	public Lookup lookup() {
+		return lookup;
 	}
 }

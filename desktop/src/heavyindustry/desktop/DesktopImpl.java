@@ -11,9 +11,9 @@ import static heavyindustry.util.Unsafer.unsafe;
 
 @SuppressWarnings("unused")
 public class DesktopImpl implements ReflectImpl {
-	static final Lookup lookup;
+	public static final Lookup lookup;
 
-	static final StackWalker walker;
+	public static final StackWalker walker;
 
 	static {
 		try {
@@ -38,7 +38,7 @@ public class DesktopImpl implements ReflectImpl {
 	}
 
 	@Override
-	public Class<?> getCallerClass() {
+	public Class<?> callerClass() {
 		try {
 			Optional<String> callerClassName = walker.walk(frames -> frames
 					.skip(1)
@@ -48,5 +48,10 @@ public class DesktopImpl implements ReflectImpl {
 		} catch (ClassNotFoundException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public Lookup lookup() {
+		return lookup;
 	}
 }
