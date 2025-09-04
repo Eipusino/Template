@@ -2,6 +2,7 @@ package heavyindustry.android;
 
 import arc.util.Log;
 import dalvik.system.VMStack;
+import heavyindustry.func.RunT;
 import heavyindustry.util.ReflectImpl;
 
 import java.lang.invoke.MethodHandles;
@@ -9,46 +10,70 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 
+import static heavyindustry.util.InteUnsafer.internalUnsafe;
+import static heavyindustry.util.Unsafer.unsafe;
+
 public class AndroidImpl implements ReflectImpl {
-	public static final Lookup lookup;
+	static Lookup lookup;
 
 	static Field accessFlags;
 
 	static {
-		try {
-			HiddenApi.setHiddenApiExemptions();
-		} catch (Throwable e) {
-			Log.err(e);
-		}
+		unsafe = getUnsafe();
 
-		try {
-			accessFlags = Class.class.getDeclaredField("accessFlags");
-			accessFlags.setAccessible(true);
-		} catch (NoSuchFieldException e) {
-			Log.err(e);
-		}
+		invoke(HiddenApi::setHiddenApiExemptions);
+		invoke(() -> internalUnsafe = getInternalUnsafe());
+		invoke(() -> {
+			try {
+				accessFlags = Class.class.getDeclaredField("accessFlags");
+				accessFlags.setAccessible(true);
+			} catch (NoSuchFieldException e) {
+				Log.err(e);
+			}
+		});
 
 		lookup = getLookup();
 	}
 
+	static sun.misc.Unsafe getUnsafe() {
+		try {
+			Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+			field.setAccessible(true);
+			return (sun.misc.Unsafe) field.get(null);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	static jdk.internal.misc.Unsafe getInternalUnsafe() {
+		try {
+			Field field = jdk.internal.misc.Unsafe.class.getDeclaredField("theUnsafe");
+			field.setAccessible(true);
+			return (jdk.internal.misc.Unsafe) field.get(null);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	static Lookup getLookup() {
 		try {
-			Field[] fields = Lookup.class.getDeclaredFields();
-			for (Field field : fields) {
-				if ("IMPL_LOOKUP".equals(field.getName())) {
-					field.setAccessible(true);
-					return (Lookup) field.get(null);
-				}
-			}
+			Field field = Lookup.class.getDeclaredField("IMPL_LOOKUP");
+			field.setAccessible(true);
+			return (Lookup) field.get(null);
 		} catch (Throwable e) {
-			Log.err("Reflection acquisition of 'IMPL_LOOKUP' encountered an exception. " + e.getClass().getName() + ": " + e.getMessage());
+			Log.err("Reflection acquisition of 'IMPL_LOOKUP' encountered an exception", e);
 
 			return MethodHandles.lookup();
 		}
+	}
 
-		Log.err("'IMPL_LOOKUP' field not found");
-
-		return MethodHandles.lookup();
+	// It may make the code look more aesthetically pleasing, but I don't like a series of try-catch blocks.
+	static void invoke(RunT<Throwable> runt) {
+		try {
+			runt.run();
+		} catch (Throwable e) {
+			Log.err(e);
+		}
 	}
 
 	@Override

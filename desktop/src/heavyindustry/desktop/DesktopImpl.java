@@ -1,30 +1,60 @@
 package heavyindustry.desktop;
 
+import arc.util.Log;
+import heavyindustry.core.DefaultImpl;
+import heavyindustry.func.RunT;
 import heavyindustry.util.ReflectImpl;
 
 import java.lang.StackWalker.Option;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
 import java.util.Optional;
 
+import static heavyindustry.util.InteUnsafer.internalUnsafe;
 import static heavyindustry.util.Unsafer.unsafe;
 
-@SuppressWarnings("unused")
 public class DesktopImpl implements ReflectImpl {
-	public static final Lookup lookup;
+	static Lookup lookup;
 
-	public static final StackWalker walker;
+	static StackWalker walker;
 
 	static {
-		try {
+		unsafe = getUnsafe();
+
+		invoke(() -> {
 			lookup = (Lookup) unsafe.getObject(Lookup.class, unsafe.staticFieldOffset(Lookup.class.getDeclaredField("IMPL_LOOKUP")));
 
 			Demodulator.makeModuleOpen(Object.class.getModule(), "jdk.internal.misc", DesktopImpl.class.getModule());
-		} catch (Throwable e) {
-			throw new RuntimeException(e);
-		}
+			Demodulator.makeModuleOpen(Object.class.getModule(), "jdk.internal.misc", DefaultImpl.class.getModule());
+
+			internalUnsafe = getInternalUnsafe();
+		});
 
 		walker = StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
+	}
+
+	static sun.misc.Unsafe getUnsafe() {
+		try {
+			Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+			field.setAccessible(true);
+			return (sun.misc.Unsafe) field.get(null);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	static jdk.internal.misc.Unsafe getInternalUnsafe() {
+		return jdk.internal.misc.Unsafe.getUnsafe();
+	}
+
+	// It may make the code look more aesthetically pleasing, but I don't like a series of try-catch blocks.
+	static void invoke(RunT<Throwable> runt) {
+		try {
+			runt.run();
+		} catch (Throwable e) {
+			Log.err(e);
+		}
 	}
 
 	@Override
