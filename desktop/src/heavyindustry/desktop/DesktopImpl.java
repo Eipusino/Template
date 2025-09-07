@@ -3,7 +3,7 @@ package heavyindustry.desktop;
 import arc.util.Log;
 import heavyindustry.core.DefaultImpl;
 import heavyindustry.func.RunT;
-import heavyindustry.util.ReflectImpl;
+import heavyindustry.util.PlatformImpl;
 
 import java.lang.StackWalker.Option;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -14,7 +14,7 @@ import java.util.Optional;
 import static heavyindustry.util.InteUnsafer.internalUnsafe;
 import static heavyindustry.util.Unsafer.unsafe;
 
-public class DesktopImpl implements ReflectImpl {
+public class DesktopImpl implements PlatformImpl {
 	static Lookup lookup;
 
 	static StackWalker walker;

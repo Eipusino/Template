@@ -2,10 +2,13 @@ package heavyindustry.android;
 
 import android.os.Build.VERSION;
 import arc.util.Log;
+import arc.util.OS;
 import dalvik.system.VMRuntime;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import static heavyindustry.util.Unsafer.unsafe;
 
 /** Only For Android */
 public class HiddenApi {
@@ -80,8 +83,8 @@ public class HiddenApi {
 		/* Find artMethod  */
 		for (int k = 0; k < length; ++k) {
 			final long addressKBs = address + k * intBytes;
-			final long addressMethod = Util.getInt(addressKBs);
-			final long addressArtMethod = Util.getLong(addressMethod + artMethodOffset);
+			final long addressMethod = unsafe.getInt(addressKBs);
+			final long addressArtMethod = unsafe.getLong(addressMethod + artMethodOffset);
 			if (min >= addressArtMethod) {
 				min = addressArtMethod;
 			} else if (minSecond >= addressArtMethod) {
@@ -100,9 +103,9 @@ public class HiddenApi {
 		if (sizeArtMethod > 0 && sizeArtMethod < 100) {
 			for (long artMethod = minSecond; artMethod < max; artMethod += sizeArtMethod) {
 				// This obtains the * Method of array [0], with a size of 32 bits
-				final long addressMethod = Util.getInt(address);
+				final long addressMethod = unsafe.getInt(address);
 				// Modify the artMethod of the first method
-				Util.putLong(addressMethod + artMethodOffset, artMethod);
+				unsafe.putLong(addressMethod + artMethodOffset, artMethod);
 				// Android's getName is a native implementation, and by modifying artMethod, the name will naturally change
 				if ("setHiddenApiExemptions".equals(array[0].getName())) {
 					Log.debug("Got: " + array[0]);
@@ -120,24 +123,40 @@ public class HiddenApi {
 		} catch (Throwable e) {
 			Log.err(e);
 		}
-		return addressOf0(array);
+		return uaddressOf(array);
 	}
 
-	public static long addressOf0(Object obj) {
-		return Util.vaddressOf(obj) + offset;
+	public static long uaddressOf(Object obj) {
+		return vaddressOf(obj) + offset;
 	}
+
+	// ---------Address/Memory Operation---------
+	static long vaddressOf(Object o) {
+		if (o == null) throw new IllegalArgumentException("o is null.");
+		oneArray[0] = o;
+		long baseOffset = unsafe.arrayBaseOffset(Object[].class);
+		return switch (unsafe.arrayIndexScale(Object[].class)) {
+			case 4 -> (unsafe.getInt(oneArray, baseOffset) & 0xFFFFFFFFL) * (OS.is64Bit ? 8 : 1);
+			case 8 -> unsafe.getLong(oneArray, baseOffset);
+			default -> throw new UnsupportedOperationException("Unsupported address size: " + unsafe.arrayIndexScale(Object[].class));
+		};
+	}
+
+	static Object[] oneArray;
+	static int[] intArray;
 
 	static long offset;
 
 	static {
-		int[] array = (int[]) runtime.newNonMovableArray(int.class, 0);
-		offset = runtime.addressOf(array) - Util.vaddressOf(array);
+		oneArray = (Object[]) runtime.newNonMovableArray(Object.class, 1);
+		intArray = (int[]) runtime.newNonMovableArray(int.class, 0);
+		offset = runtime.addressOf(intArray) - vaddressOf(intArray);
 	}
 
 	private static void replaceMethod(Method dest, Method src) {
-		long addressDest = Util.getLong(dest, artMethodOffset);
-		long addressSrc = Util.getLong(src, artMethodOffset);
+		long addressDest = unsafe.getLong(dest, artMethodOffset);
+		long addressSrc = unsafe.getLong(src, artMethodOffset);
 
-		Util.copyMemory(addressSrc + 4, addressDest + 4, 24);
+		unsafe.copyMemory(addressSrc + 4, addressDest + 4, 24);
 	}
 }

@@ -3,7 +3,7 @@ package heavyindustry.android;
 import arc.util.Log;
 import dalvik.system.VMStack;
 import heavyindustry.func.RunT;
-import heavyindustry.util.ReflectImpl;
+import heavyindustry.util.PlatformImpl;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 import static heavyindustry.util.InteUnsafer.internalUnsafe;
 import static heavyindustry.util.Unsafer.unsafe;
 
-public class AndroidImpl implements ReflectImpl {
+public class AndroidImpl implements PlatformImpl {
 	static Lookup lookup;
 
 	static Field accessFlags;
