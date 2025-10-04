@@ -10,8 +10,8 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 
-import static heavyindustry.util.InteUnsafer.internalUnsafe;
 import static heavyindustry.util.Unsafer.unsafe;
+import static heavyindustry.util.Unsaferf.internalUnsafe;
 
 public class AndroidImpl implements PlatformImpl {
 	static Lookup lookup;

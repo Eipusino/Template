@@ -6,16 +6,24 @@ import heavyindustry.func.RunT;
 import heavyindustry.util.PlatformImpl;
 
 import java.lang.StackWalker.Option;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Optional;
 
-import static heavyindustry.util.InteUnsafer.internalUnsafe;
 import static heavyindustry.util.Unsafer.unsafe;
+import static heavyindustry.util.Unsaferf.internalUnsafe;
 
 public class DesktopImpl implements PlatformImpl {
 	static Lookup lookup;
+
+	static MethodHandle getFieldsHandle;
+	static MethodHandle getMethodsHandle;
+	static MethodHandle getConstructorsHandle;
 
 	static StackWalker walker;
 
@@ -29,6 +37,12 @@ public class DesktopImpl implements PlatformImpl {
 			Demodulator.makeModuleOpen(Object.class.getModule(), "jdk.internal.misc", DefaultImpl.class.getModule());
 
 			internalUnsafe = getInternalUnsafe();
+
+			invoke(() -> {
+				getFieldsHandle = lookup.findVirtual(Class.class, "getDeclaredFields0", MethodType.methodType(Field[].class, boolean.class));
+				getMethodsHandle = lookup.findVirtual(Class.class, "getDeclaredMethods0", MethodType.methodType(Method[].class, boolean.class));
+				getConstructorsHandle = lookup.findVirtual(Class.class, "getDeclaredConstructors0", MethodType.methodType(Constructor[].class, boolean.class));
+			});
 		});
 
 		walker = StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
@@ -83,5 +97,32 @@ public class DesktopImpl implements PlatformImpl {
 	@Override
 	public Lookup lookup() {
 		return lookup;
+	}
+
+	@Override
+	public Field[] getFields(Class<?> cls) {
+		try {
+			return (Field[]) getFieldsHandle.invokeExact(cls, false);
+		} catch (Throwable e) {
+			return cls.getDeclaredFields();
+		}
+	}
+
+	@Override
+	public Method[] getMethods(Class<?> cls) {
+		try {
+			return (Method[]) getMethodsHandle.invokeExact(cls, false);
+		} catch (Throwable e) {
+			return cls.getDeclaredMethods();
+		}
+	}
+
+	@Override
+	public Constructor<?>[] getConstructors(Class<?> cls) {
+		try {
+			return (Constructor<?>[]) getConstructorsHandle.invokeExact(cls, false);
+		} catch (Throwable e) {
+			return cls.getDeclaredConstructors();
+		}
 	}
 }
