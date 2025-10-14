@@ -8,7 +8,7 @@ import dalvik.system.VMRuntime;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static heavyindustry.util.Unsafer.unsafe;
+import static heavyindustry.util.UnsafeUtils.unsafe;
 
 /** Only For Android */
 public class HiddenApi {

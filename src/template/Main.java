@@ -1,40 +1,22 @@
 package template;
 
-import arc.util.Strings;
-import arc.util.Time;
 import sun.misc.Unsafe;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
-import java.lang.invoke.VarHandle;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
 
 public class Main {
-	public static Unsafe unsafe;
-	public static Lookup lookup;
-
-	public static void main(String[] args) {
+	public static void main(String... arg) {
 		try {
-			/*unsafe = getUnsafe();
-			lookup = getLookup();
-
-			MethodHandle getConstructorsHandle = lookup.findVirtual(Class.class, "getDeclaredConstructors0", MethodType.methodType(Constructor[].class, boolean.class));
-			System.out.println(Arrays.toString((Constructor<?>[]) getConstructorsHandle.invokeExact(Main.class, false)));*/
+			FetchProcessor.start();
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static Unsafe getUnsafe() {
+	/*public static Unsafe getUnsafe() {
 		try {
 			Field field = Unsafe.class.getDeclaredField("theUnsafe");
 			field.setAccessible(true);
@@ -52,5 +34,5 @@ public class Main {
 		} catch (NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
-	}
+	}*/
 }

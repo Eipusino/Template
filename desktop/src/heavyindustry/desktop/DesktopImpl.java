@@ -1,11 +1,12 @@
 package heavyindustry.desktop;
 
 import arc.util.Log;
+import heavyindustry.HVars;
 import heavyindustry.core.DefaultImpl;
-import heavyindustry.func.RunT;
 import heavyindustry.util.PlatformImpl;
 
 import java.lang.StackWalker.Option;
+import java.lang.StackWalker.StackFrame;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
@@ -15,8 +16,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import static heavyindustry.util.Unsafer.unsafe;
-import static heavyindustry.util.Unsaferf.internalUnsafe;
+import static heavyindustry.util.InternalUtils.internalUnsafe;
+import static heavyindustry.util.ObjectUtils.run;
+import static heavyindustry.util.UnsafeUtils.unsafe;
 
 public class DesktopImpl implements PlatformImpl {
 	static Lookup lookup;
@@ -28,47 +30,49 @@ public class DesktopImpl implements PlatformImpl {
 	static StackWalker walker;
 
 	static {
-		unsafe = getUnsafe();
+		init();
+	}
 
-		invoke(() -> {
+	static void init() {
+		try {
+			Log.info("Use @", Class.forName("sun.misc.Unsafe"));
+
+			Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+			field.setAccessible(true);
+			unsafe = (sun.misc.Unsafe) field.get(null);
+
+			HVars.hasUnsafe = true;
+		} catch (Throwable e) {
+			Log.err(e);
+
+			return;
+		}
+
+		run(() -> {
 			lookup = (Lookup) unsafe.getObject(Lookup.class, unsafe.staticFieldOffset(Lookup.class.getDeclaredField("IMPL_LOOKUP")));
 
+			HVars.hasImplLookup = true;
+		});
+		run(() -> {
 			Demodulator.makeModuleOpen(Object.class.getModule(), "jdk.internal.misc", DesktopImpl.class.getModule());
 			Demodulator.makeModuleOpen(Object.class.getModule(), "jdk.internal.misc", DefaultImpl.class.getModule());
+		});
+		run(() -> {
+			Log.info("Use @", Class.forName("jdk.internal.misc.Unsafe"));
 
-			internalUnsafe = getInternalUnsafe();
+			internalUnsafe = jdk.internal.misc.Unsafe.getUnsafe();
 
-			invoke(() -> {
-				getFieldsHandle = lookup.findVirtual(Class.class, "getDeclaredFields0", MethodType.methodType(Field[].class, boolean.class));
-				getMethodsHandle = lookup.findVirtual(Class.class, "getDeclaredMethods0", MethodType.methodType(Method[].class, boolean.class));
-				getConstructorsHandle = lookup.findVirtual(Class.class, "getDeclaredConstructors0", MethodType.methodType(Constructor[].class, boolean.class));
-			});
+			HVars.hasJDKUnsafe = true;
+		});
+		run(() -> {
+			if (!HVars.hasImplLookup) return;
+
+			getFieldsHandle = lookup.findVirtual(Class.class, "getDeclaredFields0", MethodType.methodType(Field[].class, boolean.class));
+			getMethodsHandle = lookup.findVirtual(Class.class, "getDeclaredMethods0", MethodType.methodType(Method[].class, boolean.class));
+			getConstructorsHandle = lookup.findVirtual(Class.class, "getDeclaredConstructors0", MethodType.methodType(Constructor[].class, boolean.class));
 		});
 
 		walker = StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
-	}
-
-	static sun.misc.Unsafe getUnsafe() {
-		try {
-			Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-			field.setAccessible(true);
-			return (sun.misc.Unsafe) field.get(null);
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	static jdk.internal.misc.Unsafe getInternalUnsafe() {
-		return jdk.internal.misc.Unsafe.getUnsafe();
-	}
-
-	// It may make the code look more aesthetically pleasing, but I don't like a series of try-catch blocks.
-	static void invoke(RunT<Throwable> runt) {
-		try {
-			runt.run();
-		} catch (Throwable e) {
-			Log.err(e);
-		}
 	}
 
 	@Override
@@ -87,7 +91,7 @@ public class DesktopImpl implements PlatformImpl {
 			Optional<String> callerClassName = walker.walk(frames -> frames
 					.skip(1)
 					.findFirst()
-					.map(StackWalker.StackFrame::getClassName));
+					.map(StackFrame::getClassName));
 			return callerClassName.isPresent() ? Class.forName(callerClassName.get()) : null;
 		} catch (ClassNotFoundException e) {
 			return null;

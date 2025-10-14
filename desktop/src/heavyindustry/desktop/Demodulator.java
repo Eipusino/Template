@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static heavyindustry.util.Unsafer.unsafe;
+import static heavyindustry.util.UnsafeUtils.unsafe;
 
 /**
  * The anti modularity tool only provides one main method {@link Demodulator#makeModuleOpen(Module, Package, Module)}
