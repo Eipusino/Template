@@ -1,5 +1,7 @@
 package heavyindustry.desktop;
 
+import heavyindustry.HVars;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static heavyindustry.util.InvokeUtils.lookup;
 import static heavyindustry.util.UnsafeUtils.unsafe;
 
 /**
@@ -118,9 +121,22 @@ public final class Demodulator {
 	public static void ensureFieldOpen() {
 		try {
 			Class<?> clazz = Class.forName("jdk.internal.reflect.Reflection");
-			Map<Class<?>, Set<String>> map = (Map<Class<?>, Set<String>>) unsafe.getObject(clazz, fieldFilterOffset);
-			map.clear();
-		} catch (ClassNotFoundException e) {
+
+			if (HVars.hasImplLookup) {
+				Map<Class<?>, Set<String>> fieldFilterMap = (Map<Class<?>, Set<String>>) lookup.findStaticGetter(clazz, "fieldFilterMap", Map.class).invokeExact();
+				if (fieldFilterMap != null) {
+					fieldFilterMap.clear();
+				}
+
+				Map<Class<?>, Set<String>> methodFilterMap = (Map<Class<?>, Set<String>>) lookup.findStaticGetter(clazz, "methodFilterMap", Map.class).invokeExact();
+				if (methodFilterMap != null) {
+					methodFilterMap.clear();
+				}
+			} else {
+				Map<Class<?>, Set<String>> fieldFilterMap = (Map<Class<?>, Set<String>>) unsafe.getObject(clazz, fieldFilterOffset);
+				fieldFilterMap.clear();
+			}
+		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
 	}

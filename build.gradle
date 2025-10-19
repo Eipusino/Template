@@ -1,4 +1,6 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+}
 
 sourceSets.main.java.srcDir('src')
 
@@ -14,7 +16,6 @@ java {
 }
 
 ext {
-	//windows sucks
 	isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
 	sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
 }
@@ -30,12 +31,6 @@ tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 
 	options.compilerArgs.addAll([
-			"--add-exports", "java.base/jdk.internal.misc=ALL-UNNAMED"
-	])
-}
-
-test {
-	jvmArgs.addAll([
 			"--add-exports", "java.base/jdk.internal.misc=ALL-UNNAMED"
 	])
 }

@@ -33,7 +33,7 @@ dependencies {
 
 	compileOnly "com.jakewharton.android.repackaged:dalvik-dx:9.0.0_r3"
 
-	compileOnly files("${project(":").projectDir}/libs/HeavyIndustryModDesktop-Y1010A1.jar", "${project(":").projectDir}/libs/android.jar", "${project(":").projectDir}/libs/android-dalvik.jar")
+	compileOnly files("${project(":").projectDir}/libs/HeavyIndustryMod-Y1020A0.jar", "${project(":").projectDir}/libs/android.jar", "${project(":").projectDir}/libs/android-dalvik.jar")
 }
 
 jar {

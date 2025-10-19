@@ -11,12 +11,11 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 
 import static heavyindustry.util.InternalUtils.internalUnsafe;
+import static heavyindustry.util.InvokeUtils.lookup;
 import static heavyindustry.util.ObjectUtils.run;
 import static heavyindustry.util.UnsafeUtils.unsafe;
 
 public class AndroidImpl implements PlatformImpl {
-	static Lookup lookup;
-
 	static Field accessFlags;
 
 	static {
@@ -65,8 +64,6 @@ public class AndroidImpl implements PlatformImpl {
 			HVars.hasImplLookup = true;
 		} catch (Throwable e) {
 			Log.err("Reflection acquisition of 'IMPL_LOOKUP' encountered an exception", e);
-
-			lookup = MethodHandles.lookup();
 		}
 	}
 
@@ -90,10 +87,5 @@ public class AndroidImpl implements PlatformImpl {
 	@Override
 	public Class<?> callerClass() {
 		return VMStack.getStackClass2();
-	}
-
-	@Override
-	public Lookup lookup() {
-		return lookup;
 	}
 }

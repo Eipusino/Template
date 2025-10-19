@@ -17,12 +17,11 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 import static heavyindustry.util.InternalUtils.internalUnsafe;
+import static heavyindustry.util.InvokeUtils.lookup;
 import static heavyindustry.util.ObjectUtils.run;
 import static heavyindustry.util.UnsafeUtils.unsafe;
 
 public class DesktopImpl implements PlatformImpl {
-	static Lookup lookup;
-
 	static MethodHandle getFieldsHandle;
 	static MethodHandle getMethodsHandle;
 	static MethodHandle getConstructorsHandle;
@@ -96,11 +95,6 @@ public class DesktopImpl implements PlatformImpl {
 		} catch (ClassNotFoundException e) {
 			return null;
 		}
-	}
-
-	@Override
-	public Lookup lookup() {
-		return lookup;
 	}
 
 	@Override
